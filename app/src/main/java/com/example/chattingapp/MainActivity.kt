@@ -1,7 +1,9 @@
 package com.example.chattingapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -17,6 +19,7 @@ import com.example.chattingapp.Fragments.SearchFragment
 import com.example.chattingapp.Fragments.SettingsFragment
 import com.example.chattingapp.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,6 +41,34 @@ class MainActivity : AppCompatActivity() {
 
         binding.viewPager.adapter = viewPagerAdapter
         binding.tabLayout.setupWithViewPager(binding.viewPager)
+    }
+    /*
+    1. How i changed the text color and style of Chats, Search and Settings in tab layouts
+    => see tabTextAppearance in xml and styles.xml
+
+    2. How i changed the color of three dots
+    => see themes.xml -> textColorSecondary
+
+     */
+
+    override fun onCreateOptionsMenu(menu : Menu?) : Boolean {
+        menuInflater.inflate(R.menu.menu_main,menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item : MenuItem) : Boolean {
+        when(item.itemId){
+            R.id.action_logout -> {
+                FirebaseAuth.getInstance().signOut()
+                val intent = Intent(this,LoginActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                finish()
+
+                return true
+            }
+        }
+        return false
     }
 
     internal class ViewPagerAdapter(fragmentManager:FragmentManager):FragmentPagerAdapter(fragmentManager){

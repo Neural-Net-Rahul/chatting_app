@@ -49,4 +49,15 @@
     <string name="chats">Chats</string>
     <string name="search">Search</string>
     <string name="settings">Settings</string>
+    <string name="username_register">username</string>
+    <string name="email">email</string>
+    <string name="password">password</string>
+    <string name="register_now">Register Now</string>
+    <string name="login_now">Login Now</string>
+    <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="already_have_an_account">Already have an account</string>
+    <string name="forgot_your_password">Forgot your Password!!</string>
+    <string name="action_settings">Settings</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="type_email_here">Type email here :</string>
 </resources>
