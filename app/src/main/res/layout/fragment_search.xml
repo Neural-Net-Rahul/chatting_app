@@ -5,12 +5,20 @@
     android:layout_height="match_parent"
     tools:context=".Fragments.SearchFragment">
 
-    <TextView
+    <EditText
+        android:id="@+id/searchUsersBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:layout_margin="6dp"
+        android:hint="@string/search_users"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/searchListRecyclerView"
+        android:layout_margin="6dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/search"
-        android:textStyle="bold"
-        android:textSize="30sp"
-        android:gravity="center" />
+        android:layout_below="@id/searchUsersBar"/>
 
 </RelativeLayout>

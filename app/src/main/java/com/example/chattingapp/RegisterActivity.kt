@@ -16,8 +16,6 @@ class RegisterActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_register)
-
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -67,7 +65,7 @@ class RegisterActivity : AppCompatActivity() {
         val userMap =  HashMap<String,Any>()
         userMap["uid"] = firebaseUserId
         userMap["username"] = username
-        userMap["profile"] = "https://firebasestorage.googleapis.com/v0/b/chatting-app-62c9b.appspot.com/o/profile_icon.webp?alt=media&token=c7cdd78e-4649-4c7b-acd2-007138dd30d9"
+        userMap["profile"] = "https://firebasestorage.googleapis.com/v0/b/chatting-app-62c9b.appspot.com/o/profileImage.jpg?alt=media&token=d3b25ed9-28df-4c0d-987a-f71b0988bdb2"
         userMap["cover"] = "https://firebasestorage.googleapis.com/v0/b/chatting-app-62c9b.appspot.com/o/cover_page.jpg?alt=media&token=07793666-6b20-4f2b-b318-757ec41d31c5"
         userMap["status"] = "offline"
         userMap["search"] = username.lowercase()
@@ -80,7 +78,6 @@ class RegisterActivity : AppCompatActivity() {
                 task ->
                 if(task.isSuccessful){
                     val intent = Intent(this,MainActivity::class.java)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(intent)
                     finish()
                 }

@@ -14,12 +14,18 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.example.chattingapp.Class.User
 import com.example.chattingapp.Fragments.ChatFragment
 import com.example.chattingapp.Fragments.SearchFragment
 import com.example.chattingapp.Fragments.SettingsFragment
 import com.example.chattingapp.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.squareup.picasso.Picasso
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,6 +47,29 @@ class MainActivity : AppCompatActivity() {
 
         binding.viewPager.adapter = viewPagerAdapter
         binding.tabLayout.setupWithViewPager(binding.viewPager)
+
+        showImageAndUserName()
+    }
+
+    private fun showImageAndUserName() {
+        FirebaseDatabase.getInstance().reference.child("Users")
+            .child(FirebaseAuth.getInstance().currentUser!!.uid)
+            .addValueEventListener(object:ValueEventListener{
+                override fun onDataChange(snapshot : DataSnapshot) {
+                    if(snapshot.exists()){
+                        val user = snapshot.getValue(User::class.java)
+                        binding.usernameAppBarLayout.text = user!!.getUsername()
+                        Picasso.get()
+                            .load(user.getProfile())
+                            .into(binding.profileImage)
+                    }
+                }
+
+                override fun onCancelled(error : DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+
+            })
     }
     /*
     1. How i changed the text color and style of Chats, Search and Settings in tab layouts
