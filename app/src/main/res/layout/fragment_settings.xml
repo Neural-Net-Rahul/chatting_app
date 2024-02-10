@@ -3,14 +3,87 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="30dp"
     tools:context=".Fragments.SettingsFragment">
 
-    <TextView
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/settings"
-        android:textStyle="bold"
-        android:textSize="30sp"
-        android:gravity="center" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/coverImage"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"/>
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profileImageFS"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/ic_profile"
+                android:layout_marginTop="140dp"/>
+
+            <TextView
+                android:id="@+id/userNameSettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="username"
+                android:layout_below="@id/profileImageFS"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="15dp"
+                android:textColor="@color/colorPrimaryDark"
+                android:textStyle="bold"
+                android:textSize="30sp"
+                android:layout_marginBottom="20dp"/>
+
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cv1"
+        android:gravity="center"
+        android:layout_marginTop="40dp"
+        android:padding="6dp"
+        android:background="@color/colorPrimary"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/linkedinProfileLink"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/linkedin"
+            android:scaleType="centerCrop"
+            android:layout_marginEnd="35dp"
+            android:layout_gravity="center"/>
+
+        <ImageView
+            android:id="@+id/githubProfileLink"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/github"
+            android:scaleType="centerCrop"
+            android:layout_marginEnd="35dp"
+            android:layout_gravity="center"/>
+
+        <ImageView
+            android:id="@+id/websiteProfileLink"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/website"
+            android:scaleType="centerCrop"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
 
 </RelativeLayout>

@@ -2,6 +2,7 @@ package com.example.chattingapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.snackbar.Snackbar
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
                     if(snapshot.exists()){
                         val user = snapshot.getValue(User::class.java)
                         binding.usernameAppBarLayout.text = user!!.getUsername()
+                        Log.d("settingsFragment","Reached here")
                         Picasso.get()
                             .load(user.getProfile())
                             .into(binding.profileImage)
