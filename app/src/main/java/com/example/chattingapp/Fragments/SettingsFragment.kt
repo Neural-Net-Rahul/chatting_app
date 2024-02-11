@@ -203,7 +203,6 @@ class SettingsFragment : Fragment() {
                         else{
                             // profile image
                             userMap["profile"] = myUrl
-
                         }
 
                         usersRef?.updateChildren(userMap)

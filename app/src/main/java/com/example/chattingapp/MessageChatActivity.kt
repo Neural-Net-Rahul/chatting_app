@@ -11,6 +11,10 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.chattingapp.Adapter.ChatsAdapter
+import com.example.chattingapp.Class.Chat
 import com.google.android.gms.tasks.Continuation
 import com.google.firebase.storage.UploadTask.TaskSnapshot
 import com.example.chattingapp.Class.User
@@ -31,6 +35,9 @@ class MessageChatActivity : AppCompatActivity() {
 
     var userIdVisit : String = ""
     var firebaseUser: FirebaseUser? = null
+    var chatsAdapter : ChatsAdapter? = null
+    var mChatList : List<Chat>? = null
+    lateinit var recyclerViewChats:RecyclerView
 
     @SuppressLint("CutPasteId")
     override fun onCreate(savedInstanceState : Bundle?) {
@@ -41,6 +48,12 @@ class MessageChatActivity : AppCompatActivity() {
         userIdVisit = intent.getStringExtra("visitId").toString()
         firebaseUser = FirebaseAuth.getInstance().currentUser
 
+        recyclerViewChats = findViewById(R.id.recyclerViewMessageChat)
+        recyclerViewChats.setHasFixedSize(true)
+        val linearLayoutManager = LinearLayoutManager(applicationContext)
+        linearLayoutManager.stackFromEnd = true
+        recyclerViewChats.layoutManager = linearLayoutManager
+
         val reference = FirebaseDatabase.getInstance().reference
             .child("Users").child(userIdVisit)
         reference.addValueEventListener(object:ValueEventListener{
@@ -48,6 +61,8 @@ class MessageChatActivity : AppCompatActivity() {
                 val user = snapshot.getValue(User::class.java)
                 findViewById<TextView>(R.id.usernameMessageChat).text = user?.getUsername()
                 Picasso.get().load(user?.getProfile()).into(findViewById<CircleImageView>(R.id.profileImageMessageChat))
+
+                retrieveMessages(firebaseUser!!.uid,userIdVisit,user?.getProfile())
             }
 
             override fun onCancelled(error : DatabaseError) {
@@ -69,10 +84,34 @@ class MessageChatActivity : AppCompatActivity() {
 
         findViewById<ImageView>(R.id.attachImageFile).setOnClickListener{
             val intent = Intent()
+            intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
-            intent.type = "images/*"
-            startActivityForResult(Intent.createChooser(intent,"Pick Image"),438)
+            startActivityForResult(intent,438)
         }
+    }
+
+    private fun retrieveMessages(senderId : String , receiverId : String , imageUrl : String?) {
+        mChatList = ArrayList<Chat>()
+        FirebaseDatabase.getInstance().reference.child("Chats")
+            .addValueEventListener(object:ValueEventListener{
+                override fun onDataChange(snapshot : DataSnapshot) {
+                    (mChatList as ArrayList).clear()
+                    for(snap in snapshot.children){
+                        val chat = snap.getValue(Chat::class.java)
+                        if((chat!!.getReceiver() == receiverId && chat.getSender() == senderId) ||
+                            (chat.getReceiver() == senderId && chat.getSender() == receiverId)){
+                            (mChatList as ArrayList<Chat>).add(chat)
+                        }
+                        chatsAdapter = ChatsAdapter(this@MessageChatActivity,mChatList as ArrayList<Chat>,imageUrl!!)
+                        recyclerViewChats.adapter = chatsAdapter
+                    }
+                }
+
+                override fun onCancelled(error : DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+
+            })
     }
 
     private fun sendMessageToUser(senderId : String? , receiverId : String , message : String) {
@@ -152,7 +191,7 @@ class MessageChatActivity : AppCompatActivity() {
                         messageHashMap["sender"] = firebaseUser?.uid
                         messageHashMap["message"] = "sent you an image"
                         messageHashMap["receiver"] = userIdVisit
-                        messageHashMap["isseen"] = false
+                        messageHashMap["isSeen"] = false
                         messageHashMap["url"] = myUrl
                         messageHashMap["messageId"] = messageId
 

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="9dp"
+    android:layout_margin="5dp">
+
+    <RelativeLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true">
+
+        <TextView
+            android:id="@+id/showTextMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="@string/testing_msg"
+            android:textSize="18sp"
+            android:padding="8dp"
+            android:textColor="@color/white"
+            android:background="@drawable/background_right"/>
+
+        <ImageView
+            android:id="@+id/rightImageView"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentEnd="true"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/textSeen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/seen"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/showTextMessage"/>
+
+    </RelativeLayout>
+</RelativeLayout>
