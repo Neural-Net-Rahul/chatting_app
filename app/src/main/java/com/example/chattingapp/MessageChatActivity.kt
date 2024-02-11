@@ -18,6 +18,7 @@ import com.example.chattingapp.Class.Chat
 import com.google.android.gms.tasks.Continuation
 import com.google.firebase.storage.UploadTask.TaskSnapshot
 import com.example.chattingapp.Class.User
+import com.example.chattingapp.Fragments.ChatFragment
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -43,6 +44,19 @@ class MessageChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_message_chat)
+
+        val toolbar : com.google.android.material.appbar.MaterialToolbar = findViewById(R.id.toolbarMessageChat)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.title = ""
+        // back button
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            val intent = Intent(this@MessageChatActivity,ChatFragment::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            finish()
+        }
+
 
         intent = intent
         userIdVisit = intent.getStringExtra("visitId").toString()
@@ -140,7 +154,7 @@ class MessageChatActivity : AppCompatActivity() {
                     chatsListRef.addListenerForSingleValueEvent(object:ValueEventListener{
                         override fun onDataChange(snapshot : DataSnapshot) {
                             if(!snapshot.exists()){
-                                chatsListRef.child("id").child(userIdVisit)
+                                chatsListRef.child("id").setValue(userIdVisit)
                             }
                             val chatsListRecRef = FirebaseDatabase.getInstance().reference
                                 .child("ChatList")
@@ -178,7 +192,7 @@ class MessageChatActivity : AppCompatActivity() {
 
             filePath.putFile(fileUri !!)
                 .continueWithTask(Continuation<UploadTask.TaskSnapshot? , Task<Uri?>?> { task ->
-                    if (! task.isSuccessful) {
+                    if (!task.isSuccessful) {
                         throw task.exception !!
                     }
                     return@Continuation filePath.downloadUrl
@@ -198,6 +212,34 @@ class MessageChatActivity : AppCompatActivity() {
                         ref.child("Chats")
                             .child(messageId!!)
                             .setValue(messageHashMap)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val chatsListRef = FirebaseDatabase.getInstance().reference
+                                        .child("ChatList")
+                                        .child(firebaseUser !!.uid)
+                                        .child(userIdVisit)
+
+                                    chatsListRef.addListenerForSingleValueEvent(object :
+                                        ValueEventListener {
+                                        override fun onDataChange(snapshot : DataSnapshot) {
+                                            if (! snapshot.exists()) {
+                                                chatsListRef.child("id").setValue(userIdVisit)
+                                            }
+                                            val chatsListRecRef =
+                                                FirebaseDatabase.getInstance().reference
+                                                    .child("ChatList")
+                                                    .child(userIdVisit)
+                                                    .child(firebaseUser !!.uid)
+                                                    .child("id")
+                                                    .setValue(firebaseUser !!.uid)
+                                        }
+
+                                        override fun onCancelled(error : DatabaseError) {
+                                            TODO("Not yet implemented")
+                                        }
+                                    })
+                                }
+                            }
 
                         loadingBar.dismiss()
                     } else {

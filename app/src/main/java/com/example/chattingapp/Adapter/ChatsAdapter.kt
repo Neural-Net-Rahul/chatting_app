@@ -75,13 +75,17 @@ class ChatsAdapter(private var mContext : Context , private var mChatList:Mutabl
         }
 
         // sent and seen message
-//        if(position == mChatList.size - 1){
-//
-//        }
-//        else{
-//            holder.textSeen!!.visibility = View.GONE
-//        }
-        holder.textSeen!!.visibility = View.GONE
+        if(position == mChatList.size - 1){
+            // chat sender == firebase user id
+            // show sent
+            // and when it is seen -> replace it with seen
+            if(chat.getSender() == firebaseUser!!.uid){
+                holder.textSeen!!.text =  "Sent"
+            }
+        }
+        else{
+            holder.textSeen!!.visibility = View.GONE
+        }
 
         if(chat.getSender()!=firebaseUser!!.uid){
             Picasso.get().load(imageUrl).into(holder.profileImage)

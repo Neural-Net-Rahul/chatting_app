@@ -5,12 +5,23 @@
     android:layout_height="match_parent"
     tools:context=".Fragments.ChatFragment">
 
-    <TextView
+    <EditText
+        android:id="@+id/searchUsersBarChatFrag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:layout_margin="6dp"
+        android:hint="@string/search_users"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/searchListRecyclerViewChatFrag"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/chats"
-        android:textStyle="bold"
-        android:textSize="30sp"
-        android:gravity="center" />
+        android:layout_below="@id/searchUsersBarChatFrag"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginBottom="6dp" />
 
 </RelativeLayout>
