@@ -63,4 +63,5 @@
     <string name="usernameUSIL">username</string>
     <string name="last_message_seen">last message seen</string>
     <string name="search_users">Search Users...</string>
+    <string name="write_message_here">Write message here...</string>
 </resources>
