@@ -15,6 +15,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.example.chattingapp.Class.Chat
 import com.example.chattingapp.Class.User
 import com.example.chattingapp.Fragments.ChatFragment
 import com.example.chattingapp.Fragments.SearchFragment
@@ -22,6 +23,7 @@ import com.example.chattingapp.Fragments.SettingsFragment
 import com.example.chattingapp.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -31,6 +33,7 @@ import com.squareup.picasso.Picasso
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityMainBinding
+    var firebaseUser : FirebaseUser? = null
 
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,16 +41,42 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        firebaseUser = FirebaseAuth.getInstance().currentUser
+
         setSupportActionBar(binding.toolbar)
         supportActionBar!!.title = "" // necessary, else xml toolbar will be "Main Activity [Image] [username]"
 
-        val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
-        viewPagerAdapter.addFragment(ChatFragment(),"Chats")
-        viewPagerAdapter.addFragment(SearchFragment() ,"Search")
-        viewPagerAdapter.addFragment(SettingsFragment() ,"Settings")
+        var count = 0;
+        val ref = FirebaseDatabase.getInstance().reference.child("Chats")
+        ref.addValueEventListener(object:ValueEventListener{
+            override fun onDataChange(snapshot : DataSnapshot) {
+                // receiver is me
+                // isSeen is false
+                val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
+                for(snap in snapshot.children){
+                    val chat = snap.getValue(Chat::class.java)
+                    if(chat!!.getReceiver() == firebaseUser!!.uid && ! chat.isSeen()){
+                        count++;
+                    }
+                }
+                if(count==0){
+                    viewPagerAdapter.addFragment(ChatFragment(),"Chats")
+                }
+                else{
+                    viewPagerAdapter.addFragment(ChatFragment(),"(${count}) Chats")
+                }
+                viewPagerAdapter.addFragment(SearchFragment() ,"Search")
+                viewPagerAdapter.addFragment(SettingsFragment() ,"Settings")
 
-        binding.viewPager.adapter = viewPagerAdapter
-        binding.tabLayout.setupWithViewPager(binding.viewPager)
+                binding.viewPager.adapter = viewPagerAdapter
+                binding.tabLayout.setupWithViewPager(binding.viewPager)
+            }
+
+            override fun onCancelled(error : DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
 
         showImageAndUserName()
     }

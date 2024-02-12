@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -24,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
@@ -39,6 +41,7 @@ class MessageChatActivity : AppCompatActivity() {
     var chatsAdapter : ChatsAdapter? = null
     var mChatList : List<Chat>? = null
     lateinit var recyclerViewChats:RecyclerView
+    private var reference:DatabaseReference? = null
 
     @SuppressLint("CutPasteId")
     override fun onCreate(savedInstanceState : Bundle?) {
@@ -57,10 +60,10 @@ class MessageChatActivity : AppCompatActivity() {
             finish()
         }
 
-
         intent = intent
         userIdVisit = intent.getStringExtra("visitId").toString()
         firebaseUser = FirebaseAuth.getInstance().currentUser
+
 
         recyclerViewChats = findViewById(R.id.recyclerViewMessageChat)
         recyclerViewChats.setHasFixedSize(true)
@@ -68,9 +71,9 @@ class MessageChatActivity : AppCompatActivity() {
         linearLayoutManager.stackFromEnd = true
         recyclerViewChats.layoutManager = linearLayoutManager
 
-        val reference = FirebaseDatabase.getInstance().reference
+        reference = FirebaseDatabase.getInstance().reference
             .child("Users").child(userIdVisit)
-        reference.addValueEventListener(object:ValueEventListener{
+        reference!!.addValueEventListener(object:ValueEventListener{
             override fun onDataChange(snapshot : DataSnapshot) {
                 val user = snapshot.getValue(User::class.java)
                 findViewById<TextView>(R.id.usernameMessageChat).text = user?.getUsername()
@@ -102,6 +105,8 @@ class MessageChatActivity : AppCompatActivity() {
             intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(intent,438)
         }
+
+        seenMessage(userIdVisit)
     }
 
     private fun retrieveMessages(senderId : String , receiverId : String , imageUrl : String?) {
@@ -247,5 +252,32 @@ class MessageChatActivity : AppCompatActivity() {
                     }
                 }
         }
+    }
+
+    var seenListener:ValueEventListener? = null
+    private fun seenMessage(userId:String){
+        val reference = FirebaseDatabase.getInstance().reference.child("Chats")
+        seenListener = reference.addValueEventListener(object:ValueEventListener{
+            override fun onDataChange(snapshot : DataSnapshot) {
+                for(snap in snapshot.children){
+                    val chat = snap.getValue(Chat::class.java)
+                    if(chat!!.getReceiver() == firebaseUser!!.uid && chat.getSender()==userId){
+                        val hashMap = HashMap<String,Any>()
+                        hashMap["isSeen"] = true
+                        snap.ref.updateChildren(hashMap)
+                    }
+                }
+            }
+
+            override fun onCancelled(error : DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
+    }
+
+    override fun onPause() {
+        super.onPause()
+        reference!!.removeEventListener(seenListener!!)
     }
 }

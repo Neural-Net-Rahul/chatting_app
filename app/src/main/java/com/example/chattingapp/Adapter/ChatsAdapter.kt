@@ -1,6 +1,7 @@
 package com.example.chattingapp.Adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -79,8 +80,18 @@ class ChatsAdapter(private var mContext : Context , private var mChatList:Mutabl
             // chat sender == firebase user id
             // show sent
             // and when it is seen -> replace it with seen
+//            Log.d("Chatting12","${chat.isSeen()}")
             if(chat.getSender() == firebaseUser!!.uid){
-                holder.textSeen!!.text =  "Sent"
+//                Log.d("Chatting12","Entered")
+                if(!chat.isSeen()) {
+                    holder.textSeen!!.text = "Sent"
+                }
+                else{
+                    holder.textSeen!!.text = "Seen"
+                }
+            }
+            else{
+                holder.textSeen!!.visibility = View.GONE
             }
         }
         else{
