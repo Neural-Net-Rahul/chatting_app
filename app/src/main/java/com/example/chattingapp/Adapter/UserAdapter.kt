@@ -8,9 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.chattingapp.Class.Chat
 import com.example.chattingapp.Class.User
 import com.example.chattingapp.MessageChatActivity
 import com.example.chattingapp.R
+import com.example.chattingapp.VisitUserProfileActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.protobuf.Value
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
@@ -20,6 +28,7 @@ class UserAdapter(mContext:Context , mUsers:MutableList<User> , isChatCheck:Bool
         private val mContext : Context
         private val mUsers : MutableList<User>
         private var isChatCheck : Boolean
+        var lastMsg:String? = null
 
         init{
             this.mContext = mContext
@@ -49,6 +58,29 @@ class UserAdapter(mContext:Context , mUsers:MutableList<User> , isChatCheck:Bool
         holder.userName.text = user.getUsername()
         Picasso.get().load(user.getProfile()).into(holder.profileImage)
 
+        if(isChatCheck){
+            holder.lastMessage.visibility = View.VISIBLE
+            retrieveLastMessage(user.getUid(),holder.lastMessage)
+        }
+        else{
+            holder.lastMessage.visibility = View.GONE
+        }
+
+        if(isChatCheck){
+            if(user.getStatus() == "online"){
+                holder.onlineImage.visibility = View.VISIBLE
+                holder.offlineImage.visibility = View.GONE
+            }
+            else{
+                holder.offlineImage.visibility = View.VISIBLE
+                holder.onlineImage.visibility = View.GONE
+            }
+        }
+        else{
+            holder.onlineImage.visibility = View.GONE
+            holder.offlineImage.visibility = View.GONE
+        }
+
         holder.itemView.setOnClickListener{
             val options = arrayOf<CharSequence>(
                 "Send Message",
@@ -64,10 +96,44 @@ class UserAdapter(mContext:Context , mUsers:MutableList<User> , isChatCheck:Bool
                     mContext.startActivity(intent)
                 }
                 else{
-
+                    val intent = Intent(mContext, VisitUserProfileActivity::class.java)
+                    intent.putExtra("visitId",user.getUid())
+                    mContext.startActivity(intent)
                 }
             }
             builder.show()
         }
+    }
+
+    private fun retrieveLastMessage(userId : String , lastMessage : TextView) {
+        lastMsg = "defaultMsg"
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        val reference = FirebaseDatabase.getInstance().reference.child("Chats")
+        reference.addValueEventListener(object:ValueEventListener{
+            override fun onDataChange(snapshot : DataSnapshot) {
+                for(snap in snapshot.children){
+                    val chat = snap.getValue(Chat::class.java)
+                    if(firebaseUser!= null && chat!=null){
+                        if(chat.getReceiver() == firebaseUser.uid && chat.getSender()==userId
+                            || chat.getSender() == firebaseUser.uid && chat.getReceiver() == userId){
+                            lastMsg = chat.getMessage()
+                        }
+                    }
+                }
+                when(lastMsg ){
+                    "defaultMsg" -> lastMessage.text = ""
+                    "sent you an image" -> lastMessage.text = "image Sent"
+                    else -> {
+                        lastMessage.text = lastMsg
+                    }
+                }
+                lastMsg = "defaultMsg"
+            }
+
+            override fun onCancelled(error : DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
     }
 }

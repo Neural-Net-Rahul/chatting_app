@@ -46,39 +46,50 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         supportActionBar!!.title = "" // necessary, else xml toolbar will be "Main Activity [Image] [username]"
 
-        var count = 0;
-        val ref = FirebaseDatabase.getInstance().reference.child("Chats")
-        ref.addValueEventListener(object:ValueEventListener{
-            override fun onDataChange(snapshot : DataSnapshot) {
-                // receiver is me
-                // isSeen is false
-                val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
-                for(snap in snapshot.children){
-                    val chat = snap.getValue(Chat::class.java)
-                    if(chat!!.getReceiver() == firebaseUser!!.uid && ! chat.isSeen()){
-                        count++;
-                    }
-                }
-                if(count==0){
-                    viewPagerAdapter.addFragment(ChatFragment(),"Chats")
-                }
-                else{
-                    viewPagerAdapter.addFragment(ChatFragment(),"(${count}) Chats")
-                }
-                viewPagerAdapter.addFragment(SearchFragment() ,"Search")
-                viewPagerAdapter.addFragment(SettingsFragment() ,"Settings")
 
-                binding.viewPager.adapter = viewPagerAdapter
-                binding.tabLayout.setupWithViewPager(binding.viewPager)
-            }
+        val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
 
-            override fun onCancelled(error : DatabaseError) {
-                TODO("Not yet implemented")
-            }
+        viewPagerAdapter.addFragment(ChatFragment(),"Chats")
+        viewPagerAdapter.addFragment(SearchFragment() ,"Search")
+        viewPagerAdapter.addFragment(SettingsFragment() ,"Settings")
 
-        })
+        binding.viewPager.adapter = viewPagerAdapter
+        binding.tabLayout.setupWithViewPager(binding.viewPager)
+
+//        var count = 0;
+//        val ref = FirebaseDatabase.getInstance().reference.child("Chats")
+//        ref.addValueEventListener(object:ValueEventListener{
+//            override fun onDataChange(snapshot : DataSnapshot) {
+//                // receiver is me
+//                // isSeen is false
+//                val viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
+//                for(snap in snapshot.children){
+//                    val chat = snap.getValue(Chat::class.java)
+//                    if(chat!!.getReceiver() == firebaseUser!!.uid && ! chat.isSeen()){
+//                        count++;
+//                    }
+//                }
+//                if(count==0){
+//                    viewPagerAdapter.addFragment(ChatFragment(),"Chats")
+//                }
+//                else{
+//                    viewPagerAdapter.addFragment(ChatFragment(),"(${count}) Chats")
+//                }
+//                viewPagerAdapter.addFragment(SearchFragment() ,"Search")
+//                viewPagerAdapter.addFragment(SettingsFragment() ,"Settings")
+//
+//                binding.viewPager.adapter = viewPagerAdapter
+//                binding.tabLayout.setupWithViewPager(binding.viewPager)
+//            }
+//
+//            override fun onCancelled(error : DatabaseError) {
+//                TODO("Not yet implemented")
+//            }
+//
+//        })
 
         showImageAndUserName()
+        updateStatus("online")
     }
 
     private fun showImageAndUserName() {
@@ -152,5 +163,28 @@ class MainActivity : AppCompatActivity() {
         override fun getPageTitle(position : Int) : CharSequence? {
             return titles[position]
         }
+    }
+
+    private fun updateStatus(status:String){
+        val ref = FirebaseDatabase.getInstance().reference.child("Users")
+            .child(firebaseUser!!.uid)
+        val hashMap = HashMap<String,Any>()
+        hashMap["status"] = status
+        ref.updateChildren(hashMap)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateStatus("online")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        updateStatus("offline")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        updateStatus("offline")
     }
 }

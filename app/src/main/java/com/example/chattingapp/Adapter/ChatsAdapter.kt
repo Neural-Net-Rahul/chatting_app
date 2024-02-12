@@ -1,6 +1,9 @@
 package com.example.chattingapp.Adapter
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.chattingapp.Class.Chat
 import com.example.chattingapp.Class.User
 import com.example.chattingapp.R
+import com.example.chattingapp.ViewFullImageActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -64,15 +68,72 @@ class ChatsAdapter(private var mContext : Context , private var mChatList:Mutabl
                 holder.textMessage!!.visibility = View.GONE
                 holder.rightImageView!!.visibility = View.VISIBLE
                 Picasso.get().load(chat.getUrl()).into(holder.rightImageView)
+
+                holder.rightImageView!!.setOnClickListener {
+                    val options = arrayOf<CharSequence>(
+                        "View Full Image",
+                        "Delete Image",
+                        "Cancel"
+                    )
+                    val builder:AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
+                    builder.setTitle("What do you want?")
+                    builder.setItems(options,DialogInterface.OnClickListener{
+                        dialog,which ->
+                        if(which == 0){
+                            val intent = Intent(mContext,ViewFullImageActivity::class.java)
+                            intent.putExtra("url",chat.getUrl())
+                            mContext.startActivity(intent)
+                        }
+                        else if(which == 1){
+                            deleteSentMessage(position,holder);
+                        }
+                    })
+                    builder.show()
+                }
             }
             else{
                 holder.textMessage!!.visibility = View.GONE
                 holder.leftImageView!!.visibility = View.VISIBLE
                 Picasso.get().load(chat.getUrl()).into(holder.leftImageView)
+
+                holder.leftImageView!!.setOnClickListener {
+                    val options = arrayOf<CharSequence>(
+                        "View Full Image",
+                        "Cancel"
+                    )
+                    val builder:AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
+                    builder.setTitle("What do you want?")
+                    builder.setItems(options,DialogInterface.OnClickListener{
+                            dialog,which ->
+                        if(which == 0){
+                            val intent = Intent(mContext,ViewFullImageActivity::class.java)
+                            intent.putExtra("url",chat.getUrl())
+                            mContext.startActivity(intent)
+                        }
+                    })
+                    builder.show()
+                }
             }
         }
         else{
             holder.textMessage!!.text = chat.getMessage()
+
+            if(chat.getSender() == firebaseUser!!.uid){
+                holder.textMessage!!.setOnClickListener {
+                    val options = arrayOf<CharSequence>(
+                        "Delete Message" ,
+                        "Cancel"
+                    )
+                    val builder : AlertDialog.Builder = AlertDialog.Builder(holder.itemView.context)
+                    builder.setTitle("What do you want?")
+                    builder.setItems(options , DialogInterface.OnClickListener { dialog , which ->
+                        if (which == 0) {
+                            deleteSentMessage(position , holder)
+                        }
+                    })
+                    builder.show()
+                }
+            }
         }
 
         // sent and seen message
@@ -81,6 +142,7 @@ class ChatsAdapter(private var mContext : Context , private var mChatList:Mutabl
             // show sent
             // and when it is seen -> replace it with seen
 //            Log.d("Chatting12","${chat.isSeen()}")
+            holder.textSeen!!.visibility = View.VISIBLE
             if(chat.getSender() == firebaseUser!!.uid){
 //                Log.d("Chatting12","Entered")
                 if(!chat.isSeen()) {
@@ -110,5 +172,11 @@ class ChatsAdapter(private var mContext : Context , private var mChatList:Mutabl
         else{
             0;
         }
+    }
+
+    private fun deleteSentMessage(position : Int,holder : ViewHolder){
+        FirebaseDatabase.getInstance().reference.child("Chats")
+            .child(mChatList[position].getMessageId())
+            .removeValue()
     }
 }

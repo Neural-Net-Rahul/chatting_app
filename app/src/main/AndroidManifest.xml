@@ -23,6 +23,12 @@
         android:theme="@style/Theme.ChattingApp"
         tools:targetApi="31">
         <activity
+            android:name=".VisitUserProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewFullImageActivity"
+            android:exported="false" />
+        <activity
             android:name=".MessageChatActivity"
             android:exported="false" />
         <activity
@@ -41,9 +47,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/title_activity_main"
-            android:theme="@style/Theme.ChattingApp">
-
-        </activity>
+            android:theme="@style/Theme.ChattingApp" />
     </application>
 
 </manifest>
